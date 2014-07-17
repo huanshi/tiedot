@@ -45,7 +45,7 @@ func (db *DB) load() error {
 	// Create DB directory and PART_NUM_FILE if necessary
 	var numPartsAssumed = false
 	numPartsFilePath := path.Join(db.path, PART_NUM_FILE)
-	if err := os.MkdirAll(db.path, 0700); err != nil {
+	if err := os.MkdirAll(db.path, 0777); err != nil {
 		return err
 	}
 	if partNumFile, err := os.Stat(numPartsFilePath); err != nil {
@@ -139,7 +139,7 @@ func (db *DB) Create(name string) error {
 	defer db.schemaLock.Unlock()
 	if _, exists := db.cols[name]; exists {
 		return fmt.Errorf("Collection %s already exists", name)
-	} else if err := os.MkdirAll(path.Join(db.path, name), 0700); err != nil {
+	} else if err := os.MkdirAll(path.Join(db.path, name), 0777); err != nil {
 		return err
 	} else if db.cols[name], err = OpenCol(db, name); err != nil {
 		return err
@@ -224,12 +224,12 @@ func (db *DB) Scrub(name string) error {
 	// Prepare a temporary collection in file system
 	tmpColName := fmt.Sprintf("scrub-%s-%d", name, time.Now().UnixNano())
 	tmpColDir := path.Join(db.path, tmpColName)
-	if err := os.MkdirAll(tmpColDir, 0700); err != nil {
+	if err := os.MkdirAll(tmpColDir, 0777); err != nil {
 		return err
 	}
 	// Mirror indexes from original collection
 	for _, idxPath := range db.cols[name].indexPaths {
-		if err := os.MkdirAll(path.Join(tmpColDir, strings.Join(idxPath, INDEX_PATH_SEP)), 0700); err != nil {
+		if err := os.MkdirAll(path.Join(tmpColDir, strings.Join(idxPath, INDEX_PATH_SEP)), 0777); err != nil {
 			return err
 		}
 	}
@@ -300,7 +300,7 @@ func (db *DB) Dump(dest string) error {
 				return err
 			}
 			destDir := path.Join(dest, relPath)
-			if err := os.MkdirAll(destDir, 0700); err != nil {
+			if err := os.MkdirAll(destDir, 0770); err != nil {
 				return err
 			}
 			tdlog.Noticef("Dump: created directory %s", destDir)
